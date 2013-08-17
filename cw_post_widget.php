@@ -29,42 +29,39 @@ class CWPostWidget extends WP_Widget
     $category = intval(strip_tags($instance['category']));
     $header_link = strip_tags($instance['header_link']);
 
-    $args = array();
+    $query_args = array();
 
-    $args['post_type'] = 'post';
-    $args['post_status'] = 'publish';
-    $args['posts_per_page'] = 1;
+    $query_args['post_type'] = 'post';
+    $query_args['post_status'] = 'publish';
+    $query_args['posts_per_page'] = 1;
     if ($display == 'random')
-      $args['orderby'] = 'rand';
+      $query_args['orderby'] = 'rand';
     else
-      $args['p'] = $post_page_id;
+      $query_args['p'] = $post_page_id;
     if ($category && 0 === $post_page_id)
-      $args['cat'] = $category;
+      $query_args['cat'] = $category;
 
-    $tbQuery = new WP_Query($args);
+    $tbQuery = new WP_Query($query_args);
 
     if ($tbQuery->have_posts())
     {
-      echo '<div class="box">';
-
       if (!$title)
         $title = 'Quotes';
       if (strlen($header_link))
         $title = "<a href=\"$header_link\">$title</a>";
-      echo "<h3>$title</h3>";
+      echo $before_widget;
+      echo $before_title . $title . $after_title;
 
       while ($tbQuery->have_posts())
       {
         $tbQuery->the_post();
 
-        echo '<div>';
         // Respect the "more" tag on all pages
         global $more;
         $more = 0;
         the_content();
-        echo '</div>';
       }
-      echo '</div>';
+      echo $after_widget;
     }
 
     wp_reset_postdata();
