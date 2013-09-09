@@ -8,7 +8,6 @@ Version: 0.1.0
 Author URI: http://www.celticwolf.com/
 */
 
-// get flickr images
 class CWPostWidget extends WP_Widget
 {
 
@@ -41,9 +40,9 @@ class CWPostWidget extends WP_Widget
     if ($category && 0 === $post_page_id)
       $query_args['cat'] = $category;
 
-    $tbQuery = new WP_Query($query_args);
+    $query = new WP_Query($query_args);
 
-    if ($tbQuery->have_posts())
+    if ($query->have_posts())
     {
       if (!$title)
         $title = 'Quotes';
@@ -52,9 +51,9 @@ class CWPostWidget extends WP_Widget
       echo $before_widget;
       echo $before_title . $title . $after_title;
 
-      while ($tbQuery->have_posts())
+      while ($query->have_posts())
       {
-        $tbQuery->the_post();
+        $query->the_post();
 
         // Respect the "more" tag on all pages
         global $more;
