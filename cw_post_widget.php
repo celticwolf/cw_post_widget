@@ -28,7 +28,7 @@ class CWPostWidget extends WP_Widget
     $display = $instance['display'];
     $post_page_id = intval(strip_tags($instance['post_page_id']));
     $category = intval(strip_tags($instance['category']));
-    $header_link = strip_tags($instance['header_link']);
+    $title_link = strip_tags($instance['title_link']);
 
     $query_args = array();
 
@@ -48,8 +48,8 @@ class CWPostWidget extends WP_Widget
     {
       if (!$title)
         $title = 'Quotes';
-      if (strlen($header_link))
-        $title = "<a href=\"$header_link\">$title</a>";
+      if (strlen($title_link))
+        $title = "<a href=\"$title_link\">$title</a>";
       echo $before_widget;
       echo $before_title . $title . $after_title;
 
@@ -75,45 +75,23 @@ class CWPostWidget extends WP_Widget
     $instance['title'] = strip_tags($new_instance['title']);
     $instance['post_page_id'] = intval(strip_tags($new_instance['post_page_id']));
     $instance['category'] = intval(strip_tags($new_instance['category']));
-    $instance['header_link'] = strip_tags($new_instance['header_link']);
+    $instance['title_link'] = strip_tags($new_instance['title_link']);
 
     return $instance;
   }
 
   function form($instance)
   {
-    $instance = wp_parse_args((array) $instance, array('title'=>'Quotes', 'display' => 'random', 'post_page_id' => 0, 'category' => 0, 'header_link' => ''));
+    $instance = wp_parse_args((array) $instance, array('title'=>'Quotes', 'display' => 'random', 'post_page_id' => 0, 'category' => 0, 'title_link' => ''));
     $display = $instance['display'];
     $post_page_id = intval(strip_tags($instance['post_page_id']));
     $title =  strip_tags($instance['title']);
     $category = intval(strip_tags($instance['category']));
-    $header_link = strip_tags($instance['header_link']);
-  ?>
+    $title_link = strip_tags($instance['title_link']);
 
-  <p>
-    <label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'cw_post_widget'); ?></label>
-    <input class="cw-text" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>" />
-  </p>
-  <p>
-    <input type="radio" class="cw-radio" id="random_<?php echo $this->get_field_id('display'); ?>" name="<?php echo $this->get_field_name('display'); ?>"<?php checked($display, 'random'); ?> value="random" />
-    <label for="random_<?php echo $this->get_field_id('display'); ?>"><?php _e('Random order', 'cw_post_widget'); ?></label>
-    <input type="radio" class="cw-radio" id="post_page_id_<?php echo $this->get_field_id('display'); ?>" name="<?php echo $this->get_field_name('display'); ?>"<?php checked($display, 'post_page_id'); ?> value="post_page_id" />
-    <label for="post_page_id_<?php echo $this->get_field_id('display'); ?>"><?php _e('Post or page id', 'cw_post_widget'); ?></label>
-    <input class="cw-text" id="<?php echo $this->get_field_id('post_page_id'); ?>" name="<?php echo $this->get_field_name('post_page_id'); ?>" type="text" value="<?php echo esc_attr($post_page_id); ?>" />
-  </p>
-  <p>
-    <label for="<?php echo $this->get_field_id('category'); ?>"><?php _e('Category:', 'cw_post_widget'); ?></label>
-    <input class="cw-text" id="<?php echo $this->get_field_id('category'); ?>" name="<?php echo $this->get_field_name('category'); ?>" type="text" value="<?php echo esc_attr($category); ?>" />
-  </p>
-  <p>
-    <label for="<?php echo $this->get_field_id('header_link'); ?>"><?php _e('Header Link:', 'cw_post_widget'); ?></label>
-    <input class="cw-text" id="<?php echo $this->get_field_id('header_link'); ?>" name="<?php echo $this->get_field_name('header_link'); ?>" type="text" value="<?php echo esc_attr($header_link); ?>" />
-  </p>
-
-<?php
-    echo CWDisplayFunctions::SelectForPosts(
-      "post_page_id_{$this->get_field_id('display')}",
-      "post_page_id_{$this->get_field_name('display')}",
+    $post_page_select = CWDisplayFunctions::SelectForPosts(
+      $this->get_field_id('display'),
+      $this->get_field_name('display'),
       $post_page_id,
       array(
         'post_type' => array('post', 'page'),
@@ -123,6 +101,38 @@ class CWPostWidget extends WP_Widget
         'orderby' => 'title'
       )
     );
+    $categories_select = wp_dropdown_categories(
+      array(
+        'show_option_none' => __('no category', 'cw_post_widget'),
+        'orderby' => 'id',
+        'id' => $this->get_field_id('category'),
+        'name' => $this->get_field_name('category'),
+        'selected' => $category,
+        'class' => 'cw-text',
+        'echo' => false
+      )
+    );
+  ?>
+
+  <p>
+    <label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'cw_post_widget'); ?></label>
+    <input class="cw-text" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>" />
+  </p>
+  <p>
+    <input type="radio" class="cw-radio" id="<?php echo $this->get_field_id('display'); ?>" name="<?php echo $this->get_field_name('display'); ?>"<?php checked($display, 'random'); ?> value="random" />
+    <label for="<?php echo $this->get_field_id('display'); ?>"><?php _e('Random order', 'cw_post_widget'); ?></label><br />
+    <label for="<?php echo $this->get_field_id('category'); ?>"><?php _e('Category:', 'cw_post_widget'); ?></label>
+    <?php echo $categories_select; ?><br />
+    <input type="radio" class="cw-radio" id="post_page_id_<?php echo $this->get_field_id('display'); ?>" name="<?php echo $this->get_field_name('display'); ?>"<?php checked($display, 'post_page_id'); ?> value="post_page_id" />
+    <label for="<?php echo $this->get_field_id('display'); ?>"><?php _e('Post or page id', 'cw_post_widget'); ?></label>
+    <?php echo $post_page_select; ?>
+  </p>
+  <p>
+    <label for="<?php echo $this->get_field_id('title_link'); ?>"><?php _e('Header Link:', 'cw_post_widget'); ?></label>
+    <input class="cw-text" id="<?php echo $this->get_field_id('title_link'); ?>" name="<?php echo $this->get_field_name('title_link'); ?>" type="text" value="<?php echo esc_attr($title_link); ?>" />
+  </p>
+
+<?php
   }
 }
 
