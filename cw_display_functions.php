@@ -2,7 +2,7 @@
 
 class CWDisplayFunctions
 {
-  public static function SelectForPosts($id, $name, $selected_id = -1, $args = array())
+  public static function SelectForPosts($id, $name, $style, $selected_id = -1, $args = array())
   {
     $ret = '';
 
@@ -17,7 +17,7 @@ class CWDisplayFunctions
 
     wp_reset_postdata();
 
-    return "<select id=\"$id\" name=\"$name\">\n$ret</select>";
+    return "<select id=\"$id\" name=\"$name\" style=\"$style\">\n$ret</select>";
   }
 }
 

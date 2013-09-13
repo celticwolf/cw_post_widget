@@ -26,20 +26,20 @@ class CWPostWidget extends WP_Widget
     $title = apply_filters('widget_title', empty($instance['title']) ? __('Quotes', 'cw_post_widget') : $instance['title'], $instance, $this->id_base);
 
     $display = $instance['display'];
-    $post_page_id = intval(strip_tags($instance['post_page_id']));
-    $category = intval(strip_tags($instance['category']));
+    $specific_id = intval($instance['specific_id']);
+    $category = intval($instance['category']);
     $title_link = strip_tags($instance['title_link']);
 
     $query_args = array();
 
-    $query_args['post_type'] = 'post';
+    $query_args['post_type'] = array('post', 'page');
     $query_args['post_status'] = 'publish';
     $query_args['posts_per_page'] = 1;
     if ($display == 'random')
       $query_args['orderby'] = 'rand';
-    else
-      $query_args['p'] = $post_page_id;
-    if ($category && 0 === $post_page_id)
+    elseif ($display == 'specific_id')
+      $query_args['p'] = $specific_id;
+    if ($category > -1 && ($display == 'random' || $display == 'newest'))
       $query_args['cat'] = $category;
 
     $query = new WP_Query($query_args);
@@ -73,7 +73,7 @@ class CWPostWidget extends WP_Widget
     $instance = $old_instance;
     $instance['display'] = $new_instance['display'];
     $instance['title'] = strip_tags($new_instance['title']);
-    $instance['post_page_id'] = intval(strip_tags($new_instance['post_page_id']));
+    $instance['specific_id'] = intval(strip_tags($new_instance['specific_id']));
     $instance['category'] = intval(strip_tags($new_instance['category']));
     $instance['title_link'] = strip_tags($new_instance['title_link']);
 
@@ -82,17 +82,22 @@ class CWPostWidget extends WP_Widget
 
   function form($instance)
   {
-    $instance = wp_parse_args((array) $instance, array('title'=>'Quotes', 'display' => 'random', 'post_page_id' => 0, 'category' => 0, 'title_link' => ''));
+    $instance = wp_parse_args((array) $instance, array('title'=>'Quotes', 'display' => 'newest', 'specific_id' => 0, 'category' => 0, 'title_link' => ''));
     $display = $instance['display'];
-    $post_page_id = intval(strip_tags($instance['post_page_id']));
+    $specific_id = intval(strip_tags($instance['specific_id']));
     $title =  strip_tags($instance['title']);
-    $category = intval(strip_tags($instance['category']));
+    $category = intval($instance['category']);
     $title_link = strip_tags($instance['title_link']);
 
+    $display_id = $this->get_field_id('display');
+    $display_name = $this->get_field_name('display');
+    $specific_id_id = $this->get_field_id('specific_id');
+    $specific_name = $this->get_field_name('specific_id');
     $post_page_select = CWDisplayFunctions::SelectForPosts(
-      $this->get_field_id('display'),
-      $this->get_field_name('display'),
-      $post_page_id,
+      $specific_id_id,
+      $specific_name,
+      'width: 100%;',
+      $specific_id,
       array(
         'post_type' => array('post', 'page'),
         'post_status' => array('publish', 'private'),
@@ -101,35 +106,40 @@ class CWPostWidget extends WP_Widget
         'orderby' => 'title'
       )
     );
+
     $categories_select = wp_dropdown_categories(
       array(
         'show_option_none' => __('no category', 'cw_post_widget'),
-        'orderby' => 'id',
+        'orderby' => 'name',
         'id' => $this->get_field_id('category'),
         'name' => $this->get_field_name('category'),
         'selected' => $category,
-        'class' => 'cw-text',
-        'echo' => false
+        'class' => 'cw-select',
+        'echo' => false,
+        'hierarchical' => true
       )
     );
   ?>
-
   <p>
     <label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'cw_post_widget'); ?></label>
     <input class="cw-text" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>" />
   </p>
   <p>
-    <input type="radio" class="cw-radio" id="<?php echo $this->get_field_id('display'); ?>" name="<?php echo $this->get_field_name('display'); ?>"<?php checked($display, 'random'); ?> value="random" />
-    <label for="<?php echo $this->get_field_id('display'); ?>"><?php _e('Random order', 'cw_post_widget'); ?></label><br />
-    <label for="<?php echo $this->get_field_id('category'); ?>"><?php _e('Category:', 'cw_post_widget'); ?></label>
-    <?php echo $categories_select; ?><br />
-    <input type="radio" class="cw-radio" id="post_page_id_<?php echo $this->get_field_id('display'); ?>" name="<?php echo $this->get_field_name('display'); ?>"<?php checked($display, 'post_page_id'); ?> value="post_page_id" />
-    <label for="<?php echo $this->get_field_id('display'); ?>"><?php _e('Post or page id', 'cw_post_widget'); ?></label>
-    <?php echo $post_page_select; ?>
+    <label for="<?php echo $this->get_field_id('title_link'); ?>"><?php _e('Title Link:', 'cw_post_widget'); ?></label>
+    <input class="cw-text" id="<?php echo $this->get_field_id('title_link'); ?>" name="<?php echo $this->get_field_name('title_link'); ?>" type="text" value="<?php echo esc_attr($title_link); ?>" />
   </p>
   <p>
-    <label for="<?php echo $this->get_field_id('title_link'); ?>"><?php _e('Header Link:', 'cw_post_widget'); ?></label>
-    <input class="cw-text" id="<?php echo $this->get_field_id('title_link'); ?>" name="<?php echo $this->get_field_name('title_link'); ?>" type="text" value="<?php echo esc_attr($title_link); ?>" />
+    <input type="radio" class="cw-radio" id="cw_newest_<?php echo $display_id; ?>" name="<?php echo $display_name; ?>"<?php checked($display, 'newest'); ?> value="newest" />
+    <label for="<?php echo $display_id; ?>"><?php _e('Newest', 'cw_post_widget'); ?></label>
+    <input type="radio" class="cw-radio" id="cw_random_<?php echo $display_id; ?>" name="<?php echo $display_name; ?>"<?php checked($display, 'random'); ?> value="random" />
+    <label for="<?php echo $display_id; ?>"><?php _e('Random', 'cw_post_widget'); ?></label><br />
+    <label for="<?php echo $this->get_field_id('category'); ?>"><?php _e('Category:', 'cw_post_widget'); ?></label>
+    <?php echo $categories_select; ?><br />
+  </p>
+  <p>
+    <input type="radio" class="cw-radio" id="cw_specific_id_<?php echo $display_id; ?>" name="<?php echo $display_name; ?>"<?php checked($display, 'specific_id'); ?> value="specific_id" />
+    <label for="<?php echo $display_id; ?>"><?php _e('Specific post or page', 'cw_post_widget'); ?></label>
+    <?php echo $post_page_select; ?>
   </p>
 
 <?php
