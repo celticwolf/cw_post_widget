@@ -1,7 +1,7 @@
-cw_post_widget
+CW Post Widget
 ==============
 
-=== Plugin Name ===
+=== CW Post Widget ===
 Contributors: CelticWolf, ThemeBlossom
 Donate link:
 Tags: widget, post, page
