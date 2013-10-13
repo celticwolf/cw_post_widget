@@ -4,7 +4,7 @@ Plugin Name: CW Post Widget
 Plugin URI: http://www.celticwolf.com/
 Description: Displays a random, specific, or the most recent post.
 Author: Celtic Wolf, Inc.
-Version: 0.1.0
+Version: 1.0
 Author URI: http://www.celticwolf.com/
 */
 
