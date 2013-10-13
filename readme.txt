@@ -1,6 +1,5 @@
 === CW Post Widget ===
 Contributors: CelticWolfInc, ThemeBlossom
-Donate link:
 Tags: widget, post, page
 Requires at least: 3.0.1
 Tested up to: 3.6
@@ -50,9 +49,4 @@ directory take precedence. For example, '/assets/screenshot-1.png' would win ove
 
 = 1.0 =
 * First release
-
-== Upgrade Notice ==
-
-= 1.0 =
-Upgrade notices describe the reason a user should upgrade.  No more than 300 characters.
 
