@@ -1,5 +1,5 @@
 === CW Post Widget ===
-Contributors: CelticWolf, ThemeBlossom
+Contributors: CelticWolfInc, ThemeBlossom
 Donate link:
 Tags: widget, post, page
 Requires at least: 3.0.1
